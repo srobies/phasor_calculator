@@ -2,24 +2,28 @@
 
 #include <string>
 #include <cmath>
-using namespace std;
 
-enum number_type { REAL=0, IMAGINARY=1, COMPLEX=2 }; // simplify calculations by knowing number type
+typedef enum { REAL,
+  IMAGINARY,
+  COMPLEX
+} number_type; // simplify calculations by knowing number type
 
 class Number {
   private:
-    enum number_type number_type_;
-    double magnitude_;
-    double phase_; // store phase in degrees
+    number_type number_type_;
+    float magnitude_;
+    float phase_; // store phase in degrees
+    float real_;
+    float imaginary_;
   public:
     Number();
-    Number(double new_magnitude, double new_phase, enum number_type REAL);
-    double get_magnitude();
-    double get_phase();
-    enum number_type get_number_type();
-    void set_number_type(enum number_type type);
-    void set_magnitude(double new_magnitude);
-    void set_phase(double new_phase);
+    Number(float new_magnitude, float new_phase, number_type type);
+    float get_magnitude();
+    float get_phase();
+    number_type get_number_type();
+    void set_number_type(number_type type);
+    void set_magnitude(float new_magnitude);
+    void set_phase(float new_phase);
 
     // operator overload
     Number operator+(Number& input_num);
@@ -27,9 +31,11 @@ class Number {
     Number operator*(Number& input_num);
     Number operator/(Number& input_num);
 
-    string to_string();
 };
 
-double degree_to_radian(double degrees);
-double radian_to_degree(double radians);
-enum number_type determine_number_type(double phase);
+float degree_to_radian(float degrees);
+float radian_to_degree(float radians);
+number_type determine_number_type(float phase);
+float get_real(float phase, float magnitude);
+float get_imag(float phase, float magnitude);
+void print_phasor(Number& phasor);

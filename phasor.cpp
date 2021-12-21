@@ -1,25 +1,13 @@
 #include <cmath>
-#include <string>
+#include <iostream>
 #include "phasor.h"
 
-double degree_to_radians(double degrees) {
-  return degrees*(3.1415/180); // FIX: figure out what the library is for pi
+float degree_to_radian(float degrees) {
+  return degrees*(M_PI/180);
 }
 
-double radian_to_degree(double radians) {
-  return radians*(180/3.1415); // FIX: figure out what the library is for pi
-}
-
-enum number_type determine_number_type(double phase) {
-  if(phase < 0.001 || abs(phase)-180 < 0.001) {
-    return REAL;
-  }
-  else if(phase-90 < 0.001 || fmod(phase+90,360) < 0.001) {
-    return IMAGINARY;
-  }
-  else {
-    return COMPLEX;
-  }
+float radian_to_degree(float radians) {
+  return radians*(180/M_PI);
 }
 
 Number::Number() {
@@ -28,103 +16,100 @@ Number::Number() {
   phase_ = 0;
 }
 
-Number::Number(double new_magnitude, double new_phase, enum number_type type) {
+Number::Number(float new_magnitude, float new_phase, number_type type) {
   number_type_ = type;
   magnitude_ = new_magnitude;
-  phase_ = new_phase;
+  phase_ = new_phase; 
 }
 
-double Number::get_magnitude() {
+float Number::get_magnitude() {
   return magnitude_;
 }
 
-double Number::get_phase() {
+float Number::get_phase() {
   return phase_;
 }
 
-enum number_type Number::get_number_type() {
-  return number_type_;
-}
-
-void Number::set_number_type(enum number_type type) {
-  number_type_ = type;
-}
-
-void Number::set_magnitude(double new_magnitude) {
+void Number::set_magnitude(float new_magnitude) {
   magnitude_ = new_magnitude;
 }
 
-void Number::set_phase(double new_phase) {
+void Number::set_phase(float new_phase) {
   phase_ = new_phase;
 }
 
 Number Number::operator+(Number& input_num) {
-  enum number_type num_type_1 = get_number_type();
-  double real_component_1 = 0;
-  double imag_component_1 = 0;
-  if(num_type_1 == REAL) {
-    real_component_1 = get_magnitude();
-    imag_component_1 = 0;
-  }
-  else if(num_type_1 == IMAGINARY) {
-    imag_component_1 = get_magnitude();
-    real_component_1 = 0;
-  }
-  else {
-    real_component_1 = get_magnitude() * cos(degree_to_radian(get_phase()));
-    imag_component_1 = get_magnitude() * sin(degree_to_radian(get_phase()));
-  }
+  float magnitude_1 = get_magnitude();
+  float phase_1 = get_phase();
+  float magnitude_2 = input_num.get_magnitude();
+  float phase_2 = input_num.get_phase();
 
-  enum number_type num_type_2 = input_num.get_number_type();
-  double real_component_2 = 0;
-  double imag_component_2 = 0;
-  if(num_type_2 == REAL) {
-    real_component_2 = input_num.get_magnitude();
-    imag_component_2 = 0;
-  }
-  else if(num_type_2 == IMAGINARY) {
-    imag_component_2 = input_num.get_magnitude();
-    real_component_2 = 0;
-  }
-  else {
-    real_component_2 = input_num.get_magnitude() * cos(degree_to_radian(input_num.get_phase()));
-    imag_component_2 = input_num.get_magnitude() * sin(degree_to_radian(input_num.get_phase()));
-  }
-  
-  double final_real = real_component_1 + real_component_2;
-  double final_imag = imag_component_1 + imag_component_2;
+  float real_part_1 = magnitude_1 * std::cos(degree_to_radian(phase_1));
+  float imag_part_1 = magnitude_1 * std::sin(degree_to_radian(phase_1));
+  float real_part_2 = magnitude_2 * std::cos(degree_to_radian(phase_2));
+  float imag_part_2 = magnitude_2 * std::sin(degree_to_radian(phase_2));
 
-  double final_magnitude = sqrt(pow(final_real,2) + pow(final_imag,2));
-  double final_phase = radian_to_degree(tan(final_imag/final_real));
+  float new_magnitude = std::sqrt(pow(real_part_1+real_part_2,2) + pow(imag_part_1+imag_part_2,2));
+  float new_phase = std::atan((imag_part_1+imag_part_2)/(real_part_1+real_part_2));
 
-  if(final_real < 0) { // account for principle values not lining up with actual
-    final_phase += 180;
-    fmod(final_phase, 360);
-  }
-
-  set_magnitude(final_magnitude);
-  set_phase(final_phase);
-  if(final_phase < 0.001 || abs(final_phase)-180 < 0.001) {
-    set_number_type(REAL);
-  }
-  else if(final_phase-90 < 0.001 || fmod(final_phase+90,360) < 0.001) {
-    set_number_type(IMAGINARY);
-  }
-  else {
-    set_number_type(COMPLEX);
-  }
-
+  set_magnitude(new_magnitude);
+  set_phase(radian_to_degree(new_phase));
   return *this;
 }
 
 Number Number::operator-(Number& input_num) {
+  float magnitude_1 = get_magnitude();
+  float phase_1 = get_phase();
+  float magnitude_2 = input_num.get_magnitude();
+  float phase_2 = input_num.get_phase();
+
+  float real_part_1 = magnitude_1 * std::cos(degree_to_radian(phase_1));
+  float imag_part_1 = magnitude_1 * std::sin(degree_to_radian(phase_1));
+  float real_part_2 = magnitude_2 * std::cos(degree_to_radian(phase_2));
+  float imag_part_2 = magnitude_2 * std::sin(degree_to_radian(phase_2));
+
+  float new_magnitude = std::sqrt(pow(real_part_1-real_part_2,2) + pow(imag_part_1-imag_part_2,2));
+  float new_phase = std::atan((imag_part_1-imag_part_2)/(real_part_1-real_part_2)); // outputs radians
+
+  set_magnitude(new_magnitude);
+  set_phase(radian_to_degree(new_phase));
   return *this;
 }
 
 Number Number::operator*(Number& input_num) {
+  float magnitude_1 = get_magnitude();
+  float magnitude_2 = input_num.get_magnitude();
+  float phase_1 = get_phase();
+  float phase_2 = input_num.get_phase();
+
+  set_magnitude(magnitude_1 * magnitude_2);
+  set_phase(phase_1 + phase_2);
   return *this;
 }
 
 Number Number::operator/(Number& input_num) {
+  float magnitude_1 = get_magnitude();
+  float magnitude_2 = input_num.get_magnitude();
+  float phase_1 = get_phase();
+  float phase_2 = input_num.get_phase();
+
+  set_magnitude(magnitude_1 / magnitude_2);
+  set_phase(phase_1 - phase_2);
   return *this;
+}
+
+float get_real(float phase, float magnitude) { // phase in degrees
+  float radian_phase = degree_to_radian(phase);
+  return magnitude * std::cos(radian_phase);
+}
+
+float get_imag(float phase, float magnitude) { // phase in degrees
+  float radian_phase = degree_to_radian(phase);
+  return magnitude * std::sin(radian_phase);
+}
+
+void print_phasor(Number& phasor) {
+  std::cout.precision(3);
+  const char *angle_char = u8"\u2220";
+  std::cout << phasor.get_magnitude() << angle_char << phasor.get_phase();
 }
