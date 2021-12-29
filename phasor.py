@@ -4,8 +4,8 @@ import math
 class phasor:
     def __init__(self, *args): # args should be provided as (magnitude, phase) or (complex_num)
         if(len(args) == 1): # complex number input
-            self.magnitude = abs(args[0])
-            self.phase = math.degrees(cmath.phase(args[0]))
+            self.magnitude = get_magnitude(args[0])
+            self.phase = get_phase(args[0])
             self.real = args[0].real
             self.imag = args[0].imag
         else: # magnitude, phase input
@@ -38,8 +38,18 @@ class phasor:
         phase = (self.phase - other.phase) % 360
         return phasor(magnitude, phase)
 
+    def clear(self):
+        self.magnitude = 0
+        self.phase = 0
+
+    def set_magnitude(self, new_magnitude):
+        self.magnitude = new_magnitude
+
+    def set_phase(self, new_phase):
+        self.phase = new_phase
+
 def get_magnitude(complex_num):
     return abs(complex_num)
 
 def get_phase(complex_num):
-    return cmath.phase(complex_num)
+    return math.degrees(cmath.phase(complex_num))
