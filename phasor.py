@@ -89,3 +89,41 @@ def calc_imag(num: phasor) -> complex:
     mag = num.get_magnitude()
     phase = num.get_phase()
     return mag*cmath.sin(phase)
+
+@singledispatch
+def is_close(arg, phasor:phasor) -> bool: # Phasor inputs
+    mag1 = arg.get_magnitude()
+    mag2 = phasor.get_magnitude()
+    phase1 = arg.get_phase()
+    phase2 = phasor.get_phase()
+    if(math.isclose(mag1,mag2) and math.isclose(mag1,mag2)):
+        return True
+    else:
+        return False
+
+@is_close.register(int)
+def _(arg, phasor:phasor) -> bool:
+    mag = phasor.get_magnitude()
+    phase = phasor.get_phase()
+    if(not math.isclose(phase, 0)):
+        return False
+    elif(math.isclose(arg, mag)):
+        return True
+    else:
+        return False
+
+@is_close.register(complex)
+def _(arg, old:phasor) -> bool:
+    new_phasor = phasor(arg)
+    return is_close(new_phasor, old)
+
+@is_close.register(float)
+def _(arg, phasor:phasor) -> bool:
+    mag = phasor.get_magnitude()
+    phase = phasor.get_phase()
+    if(not math.isclose(phase, 0)):
+        return False
+    elif(math.isclose(arg, mag)):
+        return True
+    else:
+        return False
