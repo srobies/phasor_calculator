@@ -4,8 +4,8 @@ import math
 class phasor:
     def __init__(self, *args): # args should be provided as (magnitude, phase) or (complex_num)
         if(len(args) == 1): # complex number input
-            self.magnitude = get_magnitude(args[0])
-            self.phase = get_phase(args[0])
+            self.magnitude = calc_mag(args[0])
+            self.phase = calc_phase(args[0])
             self.real = args[0].real
             self.imag = args[0].imag
         elif(len(args) == 2): # magnitude, phase input
@@ -25,12 +25,12 @@ class phasor:
     def __add__(self, other: 'phasor') -> 'phasor':
         real = self.real + other.real
         imag = self.imag + other.imag
-        return phasor(complex(real, imag))
+        return phasor(complex(real,imag))
 
     def __sub__(self, other: 'phasor') -> 'phasor':
         real = self.real - other.real
         imag = self.imag - other.imag
-        return phasor(complex(real, imag))
+        return phasor(complex(real,imag))
 
     # TODO: Handle negative magnitudes
     def __mul__(self, other: 'phasor') -> 'phasor':
@@ -62,8 +62,30 @@ class phasor:
     def set_phase(self, new_phase: float) -> None:
         self.phase = new_phase
 
-def get_magnitude(complex_num: complex) -> float:
+    def get_magnitude(self) -> float:
+        return self.magnitude
+
+    def get_phase(self) -> float:
+        return self.phase
+
+    def get_real(self) -> float:
+        return self.real
+
+    def get_imag(self) -> float:
+        return self.imag
+
+def calc_mag(complex_num: complex) -> float:
     return abs(complex_num)
 
-def get_phase(complex_num: complex) -> float:
+def calc_phase(complex_num: complex) -> float:
     return math.degrees(cmath.phase(complex_num))
+
+def calc_real(num: phasor) -> complex:
+    mag = num.get_magnitude()
+    phase = num.get_phase()
+    return mag*cmath.cos(phase)
+
+def calc_imag(num: phasor) -> complex:
+    mag = num.get_magnitude()
+    phase = num.get_phase()
+    return mag*cmath.sin(phase)
