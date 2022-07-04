@@ -5,14 +5,14 @@ class phasor:
     def __init__(self, *args): # args should be provided as (magnitude, phase) or (complex_num)
         if(len(args) == 1): # complex number input
             self.magnitude = calc_mag(args[0])
-            self.phase = calc_phase(args[0])
+            self.phase = math.fmod(math.radians(calc_phase(args[0])), math.pi)
             self.real = args[0].real
             self.imag = args[0].imag
         elif(len(args) == 2): # magnitude, phase input
             self.magnitude = args[0]
-            self.phase = args[1]
-            self.real = self.magnitude * cmath.cos(math.radians(self.phase))
-            self.imag = self.magnitude * cmath.sin(math.radians(self.phase))
+            self.phase = math.fmod(math.radians(args[1]), math.pi)
+            self.real = self.magnitude * cmath.cos(self.phase)
+            self.imag = self.magnitude * cmath.sin(self.phase)
         else:
             self.magnitude = 0
             self.phase = 0
@@ -58,21 +58,28 @@ class phasor:
 
     def set_magnitude(self, new_magnitude: float) -> None:
         self.magnitude = new_magnitude
+        self.real = new_magnitude * math.cos(self.phase)
+        self.imag = new_magnitude * math.sin(self.phase)
 
     def set_phase(self, new_phase: float) -> None:
         self.phase = new_phase
+        self.real = self.magnitude * math.cos(new_phase)
+        self.imag = self.magnitude * math.sin(new_phase)
 
     def get_magnitude(self) -> float:
         return self.magnitude
 
     def get_phase(self) -> float:
-        return self.phase
+        return math.degrees(self.phase)
 
     def get_real(self) -> float:
         return self.real
 
     def get_imag(self) -> float:
         return self.imag
+
+    def get_complex(self) -> complex:
+        return (self.real+self.imag*1j)
 
 def calc_mag(complex_num: complex) -> float:
     return abs(complex_num)
@@ -89,41 +96,3 @@ def calc_imag(num: phasor) -> complex:
     mag = num.get_magnitude()
     phase = num.get_phase()
     return mag*cmath.sin(phase)
-
-@singledispatch
-def is_close(arg, phasor:phasor) -> bool: # Phasor inputs
-    mag1 = arg.get_magnitude()
-    mag2 = phasor.get_magnitude()
-    phase1 = arg.get_phase()
-    phase2 = phasor.get_phase()
-    if(math.isclose(mag1,mag2) and math.isclose(mag1,mag2)):
-        return True
-    else:
-        return False
-
-@is_close.register(int)
-def _(arg, phasor:phasor) -> bool:
-    mag = phasor.get_magnitude()
-    phase = phasor.get_phase()
-    if(not math.isclose(phase, 0)):
-        return False
-    elif(math.isclose(arg, mag)):
-        return True
-    else:
-        return False
-
-@is_close.register(complex)
-def _(arg, old:phasor) -> bool:
-    new_phasor = phasor(arg)
-    return is_close(new_phasor, old)
-
-@is_close.register(float)
-def _(arg, phasor:phasor) -> bool:
-    mag = phasor.get_magnitude()
-    phase = phasor.get_phase()
-    if(not math.isclose(phase, 0)):
-        return False
-    elif(math.isclose(arg, mag)):
-        return True
-    else:
-        return False
